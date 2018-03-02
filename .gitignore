@@ -1,0 +1,10 @@
+dataset*
+result*
+
+*.pyc
+
+*.jpg
+
+*.JPG
+
+*.png
