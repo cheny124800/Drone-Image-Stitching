@@ -3,7 +3,6 @@ import numpy as np
 import utilities as util
 import geometry as gm
 import copy
-import gc
 
 class Combiner:
     def __init__(self,imageList_,dataMatrix_):
@@ -22,7 +21,7 @@ class Combiner:
             #Ideally, this will mnake each image look as if it's viewed from the top.
             #We assume the ground plane is perfectly flat.
             correctedImage = gm.warpPerspectiveWithPadding(image,M)
-
+            cv2.imwrite("untrans\\" + str(i).zfill(2) + ".png", correctedImage)
             self.imageList.append(correctedImage) #store only corrected images to use in combination
         self.resultImage = self.imageList[0]
 
@@ -46,8 +45,8 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        detector = cv2.ORB_create(nfeatures=10000000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
-        #detector.setExtended(True)
+        detector = cv2.xfeatures2d.SURF_create(500) #SURF showed best results
+        detector.setExtended(True)
         gray1 = cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
         ret1, mask1 = cv2.threshold(gray1,1,255,cv2.THRESH_BINARY)
         kp1, descriptors1 = detector.detectAndCompute(gray1,mask1) #kp = keypoints
@@ -154,8 +153,4 @@ class Combiner:
         self.resultImage = result
         util.display("result",result)
         cv2.imwrite("results/intermediateResult"+str(index2)+".png",result)
-
-        gc.collect()
-        del gc.garbage[:]
-
         return result

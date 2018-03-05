@@ -1,37 +1,10 @@
 import cv2
 import numpy as np
 import utilities as util
-import geometry as gm
 import copy
 import gc
 
-class Combiner:
-    def __init__(self,imageList_,dataMatrix_):
-        '''
-        :param imageList_: List of all images in dataset.
-        :param dataMatrix_: Matrix with all pose data in dataset.
-        :return:
-        '''
-        self.imageList = []
-        self.dataMatrix = dataMatrix_
-
-        for i in range(0,len(imageList_)):
-            image = imageList_[i][::3,::3,:] #downsample the image to speed things up. 4000x3000 is huge!
-            M = gm.computeUnRotMatrix(self.dataMatrix[i,:])
-            #Perform a perspective transformation based on pose information.
-            #Ideally, this will mnake each image look as if it's viewed from the top.
-            #We assume the ground plane is perfectly flat.
-            correctedImage = gm.warpPerspectiveWithPadding(image,M)
-
-            self.imageList.append(correctedImage) #store only corrected images to use in combination
-        self.resultImage = self.imageList[0]
-
-    def createMosaic(self):
-        for i in range(1,len(self.imageList)):
-            self.combine(i)
-        return self.resultImage
-
-    def combine(self, index2):
+def combine(image1, image2):
         '''
         :param index2: index of self.imageList and self.kpList to combine with self.referenceImage and self.referenceKeypoints
         :return: combination of reference image and image at index 2
@@ -39,14 +12,15 @@ class Combiner:
 
         #Attempt to combine one pair of images at each step. Assume the order in which the images are given is the best order.
         #This intorduces drift!
+        '''
         image1 = copy.copy(self.imageList[index2 - 1])
         image2 = copy.copy(self.imageList[index2])
-
+        '''
         '''
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        detector = cv2.ORB_create(nfeatures=10000000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
+        detector = cv2.ORB_create(nfeatures=1000000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
         #detector.setExtended(True)
         gray1 = cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
         ret1, mask1 = cv2.threshold(gray1,1,255,cv2.THRESH_BINARY)
@@ -57,29 +31,28 @@ class Combiner:
         kp2, descriptors2 = detector.detectAndCompute(gray2,mask2)
 
         #Visualize matching procedure.
-        keypoints1Im = cv2.drawKeypoints(image1,kp1,outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
-        util.display("KEYPOINTS",keypoints1Im)
-        keypoints2Im = cv2.drawKeypoints(image2,kp2,outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
-        util.display("KEYPOINTS",keypoints2Im)
+        keypoints1Im = cv2.drawKeypoints(image1, kp1, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color = (0, 0, 255))
+        util.display("KEYPOINTS", keypoints1Im)
+        keypoints2Im = cv2.drawKeypoints(image2, kp2, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color = (0, 0, 255))
+        util.display("KEYPOINTS", keypoints2Im)
 
         matcher = cv2.BFMatcher() #use brute force matching
         matches = matcher.knnMatch(descriptors2,descriptors1, k=2) #find pairs of nearest matches
         #prune bad matches
         good = []
         for m, n in matches:
-            if m.distance < 0.55 * n.distance:
+            if m.distance <= 0.55 * n.distance:
                 good.append(m)
 
-        print (len(good))
+        val = (len(good))
         '''
-        if len(good) >= 50:
+        if len(good) >= 70:
             good = []
             for m, n in matches:
                 if 1:#m.distance <= 0.6 * n.distance:
                      good.append(m)
-        '''
 
-
+		'''
         '''
         good.sort(reverse=True)
         print(len(good))'''
@@ -128,17 +101,18 @@ class Combiner:
 
         '''Compute Image Alignment and Keypoint Alignment'''
         translation = np.float32(([1,0,-1*xMin],[0,1,-1*yMin],[0,0,1]))
-        warpedResImg = cv2.warpPerspective(self.resultImage, translation, (xMax-xMin, yMax-yMin))
+        warpedResImg = cv2.warpPerspective(image1, translation, (xMax-xMin, yMax-yMin))
         if A is None:
             fullTransformation = np.dot(translation,H) #again, images must be translated to be 100% visible in new canvas
             warpedImage2 = cv2.warpPerspective(image2, fullTransformation, (xMax-xMin, yMax-yMin))
         else:
-            warpedImageTemp = cv2.warpPerspective(image2, translation, (xMax-xMin, yMax-yMin))
-            warpedImage2 = cv2.warpAffine(warpedImageTemp, A, (xMax-xMin, yMax-yMin))
-        self.imageList[index2] = copy.copy(warpedImage2) #crucial: update old images for future feature extractions
+            warpedImageTemp = cv2.warpPerspective(image2, translation, (xMax - xMin, yMax - yMin))
+            warpedImage2 = cv2.warpAffine(warpedImageTemp, A, (xMax - xMin, yMax - yMin))
 
-        resGray = cv2.cvtColor(self.resultImage,cv2.COLOR_BGR2GRAY)
-        warpedResGray = cv2.warpPerspective(resGray, translation, (xMax-xMin, yMax-yMin))
+        #self.imageList[index2] = copy.copy(warpedImage2) #crucial: update old images for future feature extractions
+
+        resGray = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
+        warpedResGray = cv2.warpPerspective(resGray, translation, (xMax - xMin, yMax - yMin))
 
         '''Compute Mask for Image Combination'''
         ret, mask1 = cv2.threshold(warpedResGray,1,255,cv2.THRESH_BINARY_INV)
@@ -151,10 +125,9 @@ class Combiner:
 
         result = warpedResImg + warpedImage2
         #visualize and save result
-        self.resultImage = result
-        util.display("result",result)
-        cv2.imwrite("results/intermediateResult"+str(index2)+".png",result)
-
+        #self.resulmage = result
+        #util.display("result",result)
+        #cv2.imwrite("results/intermediateResult"+str(index2)+".png",result)
         gc.collect()
         del gc.garbage[:]
 
