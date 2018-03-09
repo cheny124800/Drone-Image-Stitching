@@ -1,5 +1,9 @@
 dataset*
 result*
+build
+dist
+
+*.spec
 
 *.pyc
 

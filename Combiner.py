@@ -3,6 +3,7 @@ import numpy as np
 import geometry as gm
 import copy
 import glob
+import gc
 
 class Combiner:
     def __init__(self,imageList_,dataMatrix_):
@@ -16,7 +17,7 @@ class Combiner:
         self.dataMatrix = dataMatrix_
         detector = cv2.ORB()
 
-        images = sorted(glob.glob("temp/*.png"))
+        images = sorted(glob.glob("temp/*.JPG"))
         print (images)
 
         for i in range(0,len(images)):
@@ -31,19 +32,19 @@ class Combiner:
             #We assume the ground plane is perfectly flat.
             correctedImage = gm.warpPerspectiveWithPadding(image,M)
             #self.imageList.append(correctedImage) #store only corrected images to use in combination
-            cv2.imwrite("temp/" + str(i).zfill(2) + ".png", correctedImage)
+            cv2.imwrite("temp/" + str(i).zfill(2) + ".JPG", correctedImage)
 
         #self.imageList = self.imageList[::-1]
         #self.resultImage = self.imageList[0]
 
-        self.correctedImages = sorted(glob.glob("temp/*.png"))
+        self.correctedImages = sorted(glob.glob("temp\*.JPG"))
         self.resultImage = cv2.imread(self.correctedImages[0])
 
     def createMosaic(self):
 
         for i in range(1,len(self.correctedImages)):
             self.combine(i)
-            #print ("Done " + str(i))
+            print ("Done " + str(i))
 
         return self.resultImage
 
@@ -54,6 +55,8 @@ class Combiner:
         :return: combination of reference image and image at index 2
         '''
 
+        gc.collect()
+
         #Attempt to combine one pair of images at each step. Assume the order in which the images are given is the best order.
         #This intorduces drift!
         image1 = cv2.imread(self.correctedImages[index2 - 1])
@@ -63,7 +66,7 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        #detector = cv2.ORB(nfeatures=50000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
+        #detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
         #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
 
         detector = cv2.xfeatures2d.SURF_create(10)
@@ -86,14 +89,17 @@ class Combiner:
 
         matcher = cv2.BFMatcher() #use brute force matching
         matches = matcher.knnMatch(descriptors2,descriptors1, k=2) #find pairs of nearest matches
+
+
         #prune bad matches
         good = []
         for m, n in matches:
             if m.distance < 0.55 * n.distance:
                 good.append(m)
 
+        print (len(good))
         matches = copy.copy(good)
-
+        del good
         '''#Visualize matches
         matchDrawing = util.drawMatches(gray2,kp2,gray1,kp1,matches)
         util.display("matches",matchDrawing)
@@ -158,9 +164,12 @@ class Combiner:
         warpedImage2[:,:,2] = warpedImage2[:,:,2]*mask3
 
         result = warpedResImg + warpedImage2
+
         #visualize and save result
         self.resultImage = result
         #util.display("result",result)
-        cv2.imwrite("results/intermediateResult"+str(index2)+".png",result)
+        cv2.imwrite("results/intermediateResult"+str(index2)+".JPG",result)
+
+        del gc.garbage[:]
 
         return result
