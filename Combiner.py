@@ -13,7 +13,6 @@ class Combiner:
         :return:
         '''
 
-
         self.imageList = []
         self.dataMatrix = dataMatrix_
         detector = cv2.ORB()
@@ -56,11 +55,11 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        detector = cv2.ORB(nfeatures=50000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
+        #detector = cv2.ORB(nfeatures=50000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
         #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
 
-        #detector = cv2.xfeatures2d.SURF_create(10)
-        #detector.setExtended (True)
+        detector = cv2.xfeatures2d.SURF_create(500)
+        detector.setExtended (True)
         #detector.setUpright (True)
 
         gray1 = cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
