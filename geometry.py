@@ -30,6 +30,7 @@ def computeUnRotMatrix(pose):
     R[2,2] = 1
     Rtrans = R.transpose()
     InvR = np.linalg.inv(Rtrans)
+
     #Return inverse of R matrix so that when applied, the transformation undoes R.
     return InvR
 
@@ -51,9 +52,6 @@ def warpPerspectiveWithPadding(image,transformation):
     [xMax, yMax] = np.int32(warpedCorners.max(axis=0).ravel() + 0.5)
     translation = np.array(([1,0,-1*xMin],[0,1,-1*yMin],[0,0,1])) #must translate image so that all of it is visible
     fullTransformation = np.dot(translation,transformation) #compose warp and translation in correct order
-
-    #image = np.uint8(image)
-    #fullTransformation = np.zeros_like(image)
-
     result = cv2.warpPerspective(image, fullTransformation, (xMax-xMin, yMax-yMin))
+
     return result

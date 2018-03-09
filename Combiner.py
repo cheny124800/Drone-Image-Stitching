@@ -12,9 +12,11 @@ class Combiner:
         :param dataMatrix_: Matrix with all pose data in dataset.
         :return:
         '''
+
+
         self.imageList = []
         self.dataMatrix = dataMatrix_
-
+        detector = cv2.ORB()
         for i in range(0,len(imageList_)):
             image = imageList_[i][::3,::3,:] #downsample the image to speed things up. 4000x3000 is huge!
             M = gm.computeUnRotMatrix(self.dataMatrix[i,:])
@@ -22,16 +24,35 @@ class Combiner:
             #Ideally, this will mnake each image look as if it's viewed from the top.
             #We assume the ground plane is perfectly flat.
             correctedImage = gm.warpPerspectiveWithPadding(image,M)
-
             self.imageList.append(correctedImage) #store only corrected images to use in combination
+
+        del imageList_
+        del dataMatrix_
+        #self.imageList = self.imageList[::-1]
         self.resultImage = self.imageList[0]
 
+
     def createMosaic(self):
+        gc.enable()
         for i in range(1,len(self.imageList)):
-            self.combine(i)
+            gc.collect()
+            try:
+                self.combine(i)
+                print ("Done " + str(i))
+
+            except:
+                self.imageList[i] = self.imageList[i - 1]
+                print ("Failed " + str(i))
+
+            finally:
+                print (gc.garbage)
+                del gc.garbage[:]
+                print (gc.garbage)
+
         return self.resultImage
 
     def combine(self, index2):
+
         '''
         :param index2: index of self.imageList and self.kpList to combine with self.referenceImage and self.referenceKeypoints
         :return: combination of reference image and image at index 2
@@ -46,8 +67,13 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        detector = cv2.ORB_create(nfeatures=10000000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
-        #detector.setExtended(True)
+        detector = cv2.ORB(nfeatures=50000, scoreType=cv2.ORB_FAST_SCORE) #SURF showed best results
+        #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
+
+        #detector = cv2.xfeatures2d.SURF_create(10)
+        #detector.setExtended (True)
+        #detector.setUpright (True)
+
         gray1 = cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
         ret1, mask1 = cv2.threshold(gray1,1,255,cv2.THRESH_BINARY)
         kp1, descriptors1 = detector.detectAndCompute(gray1,mask1) #kp = keypoints
@@ -57,9 +83,9 @@ class Combiner:
         kp2, descriptors2 = detector.detectAndCompute(gray2,mask2)
 
         #Visualize matching procedure.
-        keypoints1Im = cv2.drawKeypoints(image1,kp1,outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
+        keypoints1Im = cv2.drawKeypoints(image1, kp1, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
         util.display("KEYPOINTS",keypoints1Im)
-        keypoints2Im = cv2.drawKeypoints(image2,kp2,outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
+        keypoints2Im = cv2.drawKeypoints(image2, kp2, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
         util.display("KEYPOINTS",keypoints2Im)
 
         matcher = cv2.BFMatcher() #use brute force matching
@@ -70,19 +96,6 @@ class Combiner:
             if m.distance < 0.55 * n.distance:
                 good.append(m)
 
-        print (len(good))
-        '''
-        if len(good) >= 50:
-            good = []
-            for m, n in matches:
-                if 1:#m.distance <= 0.6 * n.distance:
-                     good.append(m)
-        '''
-
-
-        '''
-        good.sort(reverse=True)
-        print(len(good))'''
         matches = copy.copy(good)
 
         #Visualize matches
@@ -97,12 +110,10 @@ class Combiner:
         Compute Affine Transform
         Idea: Because we corrected for camera orientation, an affine transformation *should* be enough to align the images
         '''
-
-        A = cv2.estimateRigidTransform(src_pts, dst_pts, fullAffine = False) #false because we only want 5 DOF. we removed 3 DOF when we unrotated
+        A = cv2.estimateRigidTransform(src_pts,dst_pts,fullAffine=False) #false because we only want 5 DOF. we removed 3 DOF when we unrotated
         if A is None: #RANSAC sometimes fails in estimateRigidTransform(). If so, try full homography. OpenCV RANSAC implementation for homography is more robust.
-            HomogResult = cv2.findHomography(src_pts, dst_pts, method = cv2.RANSAC)
+            HomogResult = cv2.findHomography(src_pts,dst_pts,method=cv2.RANSAC)
             H = HomogResult[0]
-
 
         '''
         Compute 4 Image Corners Locations
@@ -154,8 +165,5 @@ class Combiner:
         self.resultImage = result
         util.display("result",result)
         cv2.imwrite("results/intermediateResult"+str(index2)+".png",result)
-
-        gc.collect()
-        del gc.garbage[:]
 
         return result

@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-
 def importData(fileName, imageDirectory):
     '''
     :param fileName: Name of the pose data file in string form e.g. "datasets/imageData.txt"
@@ -15,6 +14,8 @@ def importData(fileName, imageDirectory):
     fileNameMatrix = np.genfromtxt(fileName,delimiter=",",usecols=[0],dtype=str) #read filen name strings
     for i in range(0,fileNameMatrix.shape[0]): #read images
         allImages.append(cv2.imread(imageDirectory+fileNameMatrix[i]))
+
+
     return allImages, dataMatrix
 
 def display(title, image):
@@ -30,6 +31,7 @@ def display(title, image):
     cv2.imshow(title,image)
     cv2.waitKey(400)
     cv2.destroyWindow(title)
+
 
 def drawMatches(img1, kp1, img2, kp2, matches):
     """
@@ -74,6 +76,7 @@ def drawMatches(img1, kp1, img2, kp2, matches):
 
         # Draw a line in between the two points
         cv2.line(out, (int(x1),int(y1)), (int(x2)+cols1,int(y2)), color, thickness)
+
 
     # Also return the image if you'd like a copy
     return out
