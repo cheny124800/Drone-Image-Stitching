@@ -18,7 +18,7 @@ class Combiner:
         self.dataMatrix = dataMatrix_
         detector = cv2.ORB()
         for i in range(0,len(imageList_)):
-            image = imageList_[i][::3,::3,:] #downsample the image to speed things up. 4000x3000 is huge!
+            image = imageList_[i][::2,::2,:] #downsample the image to speed things up. 4000x3000 is huge!
             M = gm.computeUnRotMatrix(self.dataMatrix[i,:])
             #Perform a perspective transformation based on pose information.
             #Ideally, this will mnake each image look as if it's viewed from the top.
@@ -33,21 +33,10 @@ class Combiner:
 
 
     def createMosaic(self):
-        gc.enable()
+
         for i in range(1,len(self.imageList)):
-            gc.collect()
-            try:
-                self.combine(i)
-                print ("Done " + str(i))
-
-            except:
-                self.imageList[i] = self.imageList[i - 1]
-                print ("Failed " + str(i))
-
-            finally:
-                print (gc.garbage)
-                del gc.garbage[:]
-                print (gc.garbage)
+            self.combine(i)
+            #print ("Done " + str(i))
 
         return self.resultImage
 
