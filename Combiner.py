@@ -37,7 +37,7 @@ class Combiner:
         #self.imageList = self.imageList[::-1]
         #self.resultImage = self.imageList[0]
 
-        self.correctedImages = sorted(glob.glob("temp\*.JPG"))
+        self.correctedImages = sorted(glob.glob("temp/*.JPG"))
         self.resultImage = cv2.imread(self.correctedImages[0])
 
     def createMosaic(self):
@@ -66,12 +66,17 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        #detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
+        detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
         #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
 
+<<<<<<< HEAD
         detector = cv2.xfeatures2d.SURF_create(400)
+=======
+        '''detector = cv2.xfeatures2d.SURF_create(10)
+>>>>>>> 01bb016deff80f1a90292757a521e2b8ee47594d
         detector.setExtended (True)
         detector.setUpright (True)
+        '''
 
         gray1 = cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
         ret1, mask1 = cv2.threshold(gray1,1,255,cv2.THRESH_BINARY)
