@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import geometry as gm
 import copy
+import utilities as util
 import glob
-import gc
 
 class Combiner:
     def __init__(self,imageList_,dataMatrix_):
@@ -55,7 +55,7 @@ class Combiner:
         :return: combination of reference image and image at index 2
         '''
 
-        gc.collect()
+
 
         #Attempt to combine one pair of images at each step. Assume the order in which the images are given is the best order.
         #This intorduces drift!
@@ -69,7 +69,7 @@ class Combiner:
         #detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
         #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
 
-        detector = cv2.xfeatures2d.SURF_create(10)
+        detector = cv2.xfeatures2d.SURF_create(400)
         detector.setExtended (True)
         detector.setUpright (True)
 
@@ -82,10 +82,10 @@ class Combiner:
         kp2, descriptors2 = detector.detectAndCompute(gray2,mask2)
 
         #Visualize matching procedure.
-        #keypoints1Im = cv2.drawKeypoints(image1, kp1, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
-        #util.display("KEYPOINTS",keypoints1Im)
-        #keypoints2Im = cv2.drawKeypoints(image2, kp2, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
-        #util.display("KEYPOINTS",keypoints2Im)
+        keypoints1Im = cv2.drawKeypoints(image1, kp1, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
+        util.display("KEYPOINTS",keypoints1Im)
+        keypoints2Im = cv2.drawKeypoints(image2, kp2, outImage = cv2.DRAW_MATCHES_FLAGS_DEFAULT, color=(0,0,255))
+        util.display("KEYPOINTS",keypoints2Im)
 
         matcher = cv2.BFMatcher() #use brute force matching
         matches = matcher.knnMatch(descriptors2,descriptors1, k=2) #find pairs of nearest matches
@@ -99,7 +99,13 @@ class Combiner:
 
         print (len(good))
         matches = copy.copy(good)
-        del good
+
+
+        matchDrawing = util.drawMatches(gray2,kp2,gray1,kp1,matches)
+        util.display("matches",matchDrawing)
+
+
+
         '''#Visualize matches
         matchDrawing = util.drawMatches(gray2,kp2,gray1,kp1,matches)
         util.display("matches",matchDrawing)
@@ -167,9 +173,9 @@ class Combiner:
 
         #visualize and save result
         self.resultImage = result
-        #util.display("result",result)
+        util.display("result",result)
         cv2.imwrite("results/intermediateResult"+str(index2)+".JPG",result)
 
-        del gc.garbage[:]
+
 
         return result
