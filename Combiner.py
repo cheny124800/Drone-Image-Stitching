@@ -66,12 +66,11 @@ class Combiner:
         Descriptor computation and matching.
         Idea: Align the images by aligning features.
         '''
-        detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
+        #detector = cv2.ORB_create(nfeatures=100000) #SURF showed best results
         #detector = cv2.xfeatures2d.SIFT_create(nfeatures=10000)
 
-<<<<<<< HEAD
         detector = cv2.xfeatures2d.SURF_create(400)
-=======
+
         '''detector = cv2.xfeatures2d.SURF_create(10)
 >>>>>>> 01bb016deff80f1a90292757a521e2b8ee47594d
         detector.setExtended (True)

@@ -4,7 +4,6 @@ Driver script. Execute this to perform the mosaic procedure.
 
 import utilities as util
 import Combiner
-<<<<<<< HEAD
 import cv2
 import Dataset
 import os
@@ -19,12 +18,6 @@ if os.path.isdir('results') == True:
     os.rename('results', 'results - ' + str(now))
 
 os.mkdir('results')
-
-=======
-import Dataset
-
-Dataset.write()
->>>>>>> 01bb016deff80f1a90292757a521e2b8ee47594d
 
 fileName = "datasets/imageData.txt"
 imageDirectory = "datasets/images/"
