@@ -20,7 +20,7 @@ def importData(fileName, imageDirectory):
 
     return allImages, dataMatrix
 
-def display(title, image):
+def display(title, image, val = 400):
     '''
     OpenCV machinery for showing an image until the user presses a key.
     :param title: Window title in string form
@@ -31,7 +31,7 @@ def display(title, image):
     cv2.namedWindow(title,cv2.WINDOW_NORMAL)
     cv2.resizeWindow(title,1920,1080)
     cv2.imshow(title,image)
-    cv2.waitKey(400)
+    cv2.waitKey(val)
     cv2.destroyWindow(title)
 
 
