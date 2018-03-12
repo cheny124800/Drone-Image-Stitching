@@ -20,7 +20,6 @@ def write():
 
     input = open("datasets/imageData.txt","a+")
 
-
     for image in sorted(glob.glob('datasets/images/*')):
         exif_data = ExifData.get_exif_data(Image.open(image))
         lat, lon = ExifData.get_lat_lon(exif_data)
