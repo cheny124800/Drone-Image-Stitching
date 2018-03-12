@@ -43,6 +43,10 @@ def combine(image1, image2, detector):
             good.append(m)
 
     print (len(good))
+
+    if len(good) <= 10:
+        return image1
+
     matches = copy.copy(good)
 
     matchDrawing = util.drawMatches(gray2,kp2,gray1,kp1,matches)

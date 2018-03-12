@@ -11,7 +11,7 @@ import datetime
 import Perspective
 import shutil
 
-cv2.ocl.setUseOpenCL(False)
+
 now = datetime.datetime.now().strftime('%Y-%m-%d %H_%M_%S')
 
 Dataset.write()
