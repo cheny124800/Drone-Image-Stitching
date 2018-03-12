@@ -15,7 +15,7 @@ def combine():
         try:
             result = CombinePair.combine(result, image, detector)
             cv2.imwrite("results/int_res" + str(i) + ".png", result)
-            print ("Done " + str(i))
+            print ("Stitched " + str(i + 1) + " Images")
 
         except:
             print ("Fail " + str(i))

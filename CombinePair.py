@@ -42,7 +42,7 @@ def combine(image1, image2, detector):
         if m.distance < 0.55 * n.distance:
             good.append(m)
 
-    print (len(good))
+    print (str(len(good)) + " Matches were Found")
 
     if len(good) <= 10:
         return image1

@@ -5,7 +5,7 @@ import glob
 def changePerspective(imageList, dataMatrix):
 
     images = sorted(glob.glob("temp/*.png"))
-    print ("Warping Perspective Now")
+    print ("Warping Perspective of Images Now")
 
     for i in range(0,len(images)):
         image = cv2.imread(images[i])
