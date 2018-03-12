@@ -14,6 +14,6 @@ def changePerspective(imageList, dataMatrix):
         M = gm.computeUnRotMatrix(dataMatrix[i,:])
         correctedImage = gm.warpPerspectiveWithPadding(image,M)
 
-        cv2.imwrite("temp/" + str(i).zfill(2) + ".png", correctedImage)
+        cv2.imwrite("temp/" + str(i).zfill(4) + ".png", correctedImage)
 
     print ("Done Warping Perspective")

@@ -16,7 +16,7 @@ def importData(fileName, imageDirectory):
     for i in range(0,fileNameMatrix.shape[0]): #read images
 
         #allImages.append(cv2.imread(imageDirectory+fileNameMatrix[i]))
-        cv2.imwrite("temp/" + str(i).zfill(2) + ".png", cv2.imread(imageDirectory+fileNameMatrix[i]))
+        cv2.imwrite("temp/" + str(i).zfill(4) + ".png", cv2.imread(imageDirectory+fileNameMatrix[i]))
 
     return allImages, dataMatrix
 
