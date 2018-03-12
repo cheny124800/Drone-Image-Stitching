@@ -4,7 +4,7 @@ import glob
 
 def changePerspective(imageList, dataMatrix):
 
-    images = sorted(glob.glob("temp/*.JPG"))
+    images = sorted(glob.glob("temp/*.png"))
     print ("Warping Perspective Now")
 
     for i in range(0,len(images)):
