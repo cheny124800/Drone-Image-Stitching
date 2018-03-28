@@ -39,7 +39,7 @@ def write():
 
     output = open(path, 'w')
 
-    for line in sorted(lines, key=itemgetter(4)):
+    for line in sorted(lines, key=itemgetter(3)):
         output.write(','.join(line))
 
     output.close()
