@@ -1,6 +1,8 @@
 build
 dist
 
+*.txt
+
 *.spec
 
 *.pyc

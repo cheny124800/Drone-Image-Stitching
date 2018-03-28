@@ -11,6 +11,11 @@ def changePerspective(imageList, dataMatrix):
         image = cv2.imread(images[i])
         image = image[::2, ::2, :]
 
+        rows,cols = image.shape[:2]
+
+        # M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
+        # correctedImage = cv2.warpAffine(image,M,(cols,rows))
+
         M = gm.computeUnRotMatrix(dataMatrix[i,:])
         correctedImage = gm.warpPerspectiveWithPadding(image,M)
 

@@ -1,7 +1,9 @@
+from operator import itemgetter
+from PIL import Image
 import ExifData, XMPData
 import glob
-from PIL import Image
 import os
+
 
 #input = open("datasets/imageData.txt","w+")
 
@@ -31,4 +33,18 @@ def write():
 
     input.close()
 
+    path = "datasets/imageData.txt"
+    with open(path) as f:
+        lines = [line.split(',') for line in f]
+
+    output = open(path, 'w')
+
+    for line in sorted(lines, key=itemgetter(4)):
+        output.write(','.join(line))
+
+    output.close()
+
 #write()
+
+if __name__ == '__main__':
+    write()
