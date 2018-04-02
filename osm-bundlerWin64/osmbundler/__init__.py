@@ -209,7 +209,7 @@ class OsmBundler():
             if ccdWidth==None:
                 while True:
                     print ("Type CCD width in mm for the camera %s, %s. Press Enter to skip the camera." % (exifMake, exifModel))
-                    userInput = raw_input("CCD width in mm: ")
+                    userInput = input("CCD width in mm: ")
                     # Enter key was pressed
                     if not userInput: return
                     try:
