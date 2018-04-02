@@ -19,11 +19,11 @@ def combine():
 
         except:
             print ("Fail " + str(i))
-            #cv2.imwrite("results/int_res" + str(i) + ".JPG", result)
+            cv2.imwrite("results/int_res" + str(i) + ".JPG", result)
 
         h, w = result.shape[:2]
 
-        if h > 4000 and w > 4000:
+        if h > 4000 or w > 4000:
 
             if h > 4000:
                 hx = 4000/h

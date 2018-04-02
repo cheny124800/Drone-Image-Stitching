@@ -32,7 +32,7 @@ def write():
         input.write(st)
 
     input.close()
-
+    '''
     path = "datasets/imageData.txt"
     with open(path) as f:
         lines = [line.split(',') for line in f]
@@ -43,6 +43,7 @@ def write():
         output.write(','.join(line))
 
     output.close()
+    '''
 
 #write()
 
