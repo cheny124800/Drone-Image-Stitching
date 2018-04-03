@@ -371,8 +371,11 @@ class OsmBundler():
         files = sorted(glob.glob(os.path.join(os.path.join(self.workDir, "bundle"), "*.ply")))
 
         print (files[-1])
+        src = files[-1]
+        dst = os.path.join(os.path.dirname(os.getcwd()), "results")
 
-        shutil.copyfile(files[len(files) - 1], os.path.join(os.path.join(os.path.dirname(os.getcwd), "results"), "result.ply"))
+        shutil.copyfile(src, dst)
+        #os.system('copy ' + src + ' ' + dst)
 
         if sys.platform == "win32": subprocess.call(["explorer", self.workDir])
         else: print "See the results in the '%s' directory" % self.workDir
